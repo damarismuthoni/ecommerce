@@ -4,6 +4,7 @@ const passport = require('passport');
 const session = require('express-session');
 const authRoutes = require('./routes/auth');
 const app = express();
+require('dotenv').config();
 
 // Body parser middleware
 app.use(express.json());
@@ -27,20 +28,26 @@ app.set('view engine', 'ejs');
 app.use('/auth', authRoutes);
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/ecommerce', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
-// Set view engine to EJS
-app.set('view engine', 'ejs');
+  .catch((err) => console.error(err));  
 
-// Use auth routes
-app.use('/auth', authRoutes);
+  
+
+mongoose.connect(process.env.MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+  
 
 // Default route
 app.get('/', (req, res) => {
   res.send('Home Page');
 });
 
+app.get('/auth/google',
+  passport.authenticate('google', { scope: ['profile', 'email'] })
+);
 
 // Start server
 const PORT = process.env.PORT || 5000;
